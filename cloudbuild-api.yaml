@@ -1,0 +1,5 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/supercloud-monorepo/supercloud-api', '-f', 'apps/api/Dockerfile', '.']
+images:
+- 'gcr.io/supercloud-monorepo/supercloud-api'

@@ -1,0 +1,22 @@
+{
+  "name": "supercloud",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "dev:marketing": "turbo run dev --filter=@supercloud/marketing",
+    "dev:console": "turbo run dev --filter=@supercloud/console",
+    "dev:api": "turbo run dev --filter=@supercloud/api",
+    "db:generate": "turbo run generate --filter=@supercloud/db",
+    "db:push": "turbo run push --filter=@supercloud/db"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  },
+  "packageManager": "npm@10.8.0"
+}

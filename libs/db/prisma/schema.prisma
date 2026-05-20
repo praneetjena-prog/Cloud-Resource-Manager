@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ResourceType {
+  COMPUTE
+  DATABASE
+  STORAGE
+  NETWORK
+}
+
+enum ResourceStatus {
+  RUNNING
+  STOPPED
+  PROVISIONING
+  TERMINATED
+  ERROR
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+  REFUND
+  BONUS
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model User {
+  id            String             @id @default(cuid())
+  email         String             @unique
+  name          String
+  avatarUrl     String?
+  creditBalance Float              @default(500.0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  transactions  CreditTransaction[]
+  resources     CloudResource[]
+  tickets       SupportTicket[]
+
+  @@map("users")
+}
+
+model CreditTransaction {
+  id             String          @id @default(cuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           TransactionType
+  amount         Float
+  balanceAfter   Float
+  resourceType   ResourceType?
+  resourceId     String?
+  resource       CloudResource?  @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+  description    String
+  metadata       Json?
+  hash           String          @unique
+  previousHash   String?
+  createdAt      DateTime        @default(now())
+
+  @@index([userId, createdAt])
+  @@map("credit_transactions")
+}
+
+model CloudResource {
+  id              String             @id @default(cuid())
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  type            ResourceType
+  status          ResourceStatus     @default(PROVISIONING)
+  region          String             @default("us-east-1")
+  spec            Json
+  costPerHour     Float
+  totalCost       Float              @default(0)
+  provisionedAt   DateTime           @default(now())
+  lastStartedAt   DateTime?
+  lastStoppedAt   DateTime?
+  transactions    CreditTransaction[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([userId, status])
+  @@map("cloud_resources")
+}
+
+model SupportTicket {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject     String
+  description String
+  category    String
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  metadata    Json?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([userId, status])
+  @@map("support_tickets")
+}

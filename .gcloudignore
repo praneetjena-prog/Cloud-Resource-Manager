@@ -1,0 +1,13 @@
+.git
+node_modules
+.next
+apps/marketing/.next
+apps/console/.next
+apps/marketing/node_modules
+apps/console/node_modules
+apps/api/node_modules
+apps/api/dist
+libs/db/node_modules
+libs/shared-ui/node_modules
+.turbo
+*.log
