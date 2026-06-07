@@ -1,6 +1,6 @@
-const MARKETING = "https://supercloud-marketing-623693490738.us-central1.run.app";
-const CONSOLE   = "https://supercloud-console-623693490738.us-central1.run.app";
-const API       = "https://supercloud-api-623693490738.us-central1.run.app";
+const MARKETING = "https://cloud-resource-manager-marketing.vercel.app";
+const CONSOLE   = "https://cloud-resource-manager-console.vercel.app";
+const API       = "https://cloud-resource-manager-api.vercel.app";
 
 export default {
   async fetch(request) {
@@ -23,30 +23,14 @@ export default {
 
     // ── /console or /console/* ───────────────────────────────────
     if (path === "/console" || path.startsWith("/console/")) {
-      const stripped = path.replace(/^\/console/, "") || "/";
-      const target   = new URL(CONSOLE + stripped + url.search);
-
+      // Forward the full path (including /console) directly since Console app has basePath: "/console"
+      const target = new URL(CONSOLE + path + url.search);
       const req = new Request(target, {
         method:  request.method,
         headers: request.headers,
         body:    request.body,
       });
-      const res     = await fetch(req);
-      const ctype   = res.headers.get("content-type") || "";
-
-      // Rewrite HTML so _next asset paths resolve correctly under /console
-      if (ctype.includes("text/html")) {
-        let html = await res.text();
-        html = html
-          .replaceAll('src="/_next/', 'src="/console/_next/')
-          .replaceAll('href="/_next/', 'href="/console/_next/')
-          .replaceAll('"/_next/', '"/console/_next/');
-        const headers = new Headers(res.headers);
-        headers.delete("content-length");
-        return new Response(html, { status: res.status, headers });
-      }
-
-      return res;
+      return fetch(req);
     }
 
     // ── /* → Marketing (default) ─────────────────────────────────
